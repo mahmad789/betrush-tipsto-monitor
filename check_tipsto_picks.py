@@ -147,32 +147,60 @@ def save_seen(seen_set):
             f.write(item + "\n")
 
 
+# def fetch_tipsto_picks():
+#     response = requests.get(URL)
+#     soup = BeautifulSoup(response.text, "html.parser")
+
+#     picks = []
+
+#     # Each pick row inside table.picks
+#     rows = soup.select("table.picks tr")
+
+#     for row in rows:
+
+#         # TIPSTER NAME column → <td class="right_td">
+#         tipster_td = row.find("td", class_="right_td")
+#         if not tipster_td:
+#             continue
+
+#         tipster_text = tipster_td.get_text(strip=True)
+
+#         # Check: is this row from Tipsto?
+#         if TIPSTER_NAME not in tipster_text:
+#             continue
+
+#         # MATCH TITLE column → <td class="pick_descr">
+#         match_td = row.find("td", class_="pick_descr")
+#         if match_td:
+#             match_title = match_td.get_text(strip=True)
+#         else:
+#             match_title = "Unknown Match"
+
+#         pick_str = f"{TIPSTER_NAME} - {match_title}"
+#         picks.append(pick_str)
+
+#     return picks
 def fetch_tipsto_picks():
     response = requests.get(URL)
     soup = BeautifulSoup(response.text, "html.parser")
 
     picks = []
 
-    # Each pick row inside table.picks
     rows = soup.select("table.picks tr")
-
     for row in rows:
-
-        # TIPSTER NAME column → <td class="right_td">
+        # TIPSTER NAME
         tipster_td = row.find("td", class_="right_td")
         if not tipster_td:
             continue
-
         tipster_text = tipster_td.get_text(strip=True)
-
-        # Check: is this row from Tipsto?
         if TIPSTER_NAME not in tipster_text:
             continue
 
-        # MATCH TITLE column → <td class="pick_descr">
-        match_td = row.find("td", class_="pick_descr")
+        # MATCH TITLE inside <td class="picktooltip"> -> <a>
+        match_td = row.find("td", class_="picktooltip")
         if match_td:
-            match_title = match_td.get_text(strip=True)
+            a_tag = match_td.find("a")
+            match_title = a_tag.get_text(strip=True) if a_tag else "Unknown Match"
         else:
             match_title = "Unknown Match"
 
@@ -180,6 +208,7 @@ def fetch_tipsto_picks():
         picks.append(pick_str)
 
     return picks
+
 
 
 def main():
@@ -206,4 +235,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
