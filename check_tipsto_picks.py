@@ -117,7 +117,7 @@ SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 EMAIL_USER = "testingformerightnow@gmail.com"
 EMAIL_PASS = "jzvq wyhk xrkp qynt"
-EMAIL_TO = "ahmadmubashir9009@gmail.com"
+EMAIL_TO = "nikolab96@yahoo.com"
 # ------------------------------------------
 
 
@@ -206,3 +206,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
