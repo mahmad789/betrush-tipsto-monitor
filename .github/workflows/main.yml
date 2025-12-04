@@ -21,6 +21,10 @@ jobs:
       - name: Install dependencies
         run: |
           pip install requests beautifulsoup4
+      - name: Install SeleniumBase
+        run: |
+          pip install seleniumbase
+
 
       - name: Run script
         env:
