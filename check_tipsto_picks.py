@@ -211,41 +211,93 @@ def save_seen(seen_set):
 
 
 
-def fetch_tipsto_picks():
-    response = requests.get(URL)
-    soup = BeautifulSoup(response.text, "html.parser")
+# def fetch_tipsto_picks():
+#     response = requests.get(URL)
+#     soup = BeautifulSoup(response.text, "html.parser")
 
+#     picks = []
+
+#     rows = soup.select("table.picks tr")
+#     for row in rows:
+#         # TIPSTER NAME
+#         tipster_td = row.find("td", class_="right_td")
+#         if not tipster_td:
+#             continue
+#         tipster_text = tipster_td.get_text(strip=True)
+#         if TIPSTER_NAME not in tipster_text:
+#             continue
+
+#         # TIPSTER link inside <a> in right_td
+#         a_tag_tipster = tipster_td.find("a")
+#         if a_tag_tipster and a_tag_tipster.has_attr("href"):
+#             tipster_link = a_tag_tipster['href']
+#             # prepend base URL if relative
+#             if not tipster_link.startswith("http"):
+#                 tipster_link = URL.rstrip("/") + "/" + tipster_link.lstrip("/")
+#         else:
+#             tipster_link = "No URL"
+
+#         # MATCH TITLE inside <td class="picktooltip"> -> <a>
+#         match_td = row.find("td", class_="picktooltip")
+#         if match_td:
+#             a_tag_match = match_td.find("a")
+#             match_title = a_tag_match.get_text(strip=True) if a_tag_match else "Unknown Match"
+#         else:
+#             match_title = "Unknown Match"
+
+#         # Combine into final string
+#         pick_str = f"{TIPSTER_NAME} - {match_title} ({tipster_link})"
+#         picks.append(pick_str)
+
+#     return picks
+
+
+
+
+
+from seleniumbase import SB
+from bs4 import BeautifulSoup
+import time
+
+def fetch_tipsto_picks():
+    with SB() as sb:
+        sb.open("https://www.betrush.com")
+        sb.sleep(3)  # allow JS to load picks table
+
+        html = sb.get_page_source()
+
+    soup = BeautifulSoup(html, "html.parser")
     picks = []
 
     rows = soup.select("table.picks tr")
     for row in rows:
-        # TIPSTER NAME
+
+        # 1️⃣ Tipster Name (inside td.right_td > a)
         tipster_td = row.find("td", class_="right_td")
         if not tipster_td:
             continue
-        tipster_text = tipster_td.get_text(strip=True)
-        if TIPSTER_NAME not in tipster_text:
+
+        a_tag_tipster = tipster_td.find("a")
+        if not a_tag_tipster:
             continue
 
-        # TIPSTER link inside <a> in right_td
-        a_tag_tipster = tipster_td.find("a")
-        if a_tag_tipster and a_tag_tipster.has_attr("href"):
-            tipster_link = a_tag_tipster['href']
-            # prepend base URL if relative
-            if not tipster_link.startswith("http"):
-                tipster_link = URL.rstrip("/") + "/" + tipster_link.lstrip("/")
-        else:
-            tipster_link = "No URL"
+        tipster_text = a_tag_tipster.get_text(strip=True)
+        if TIPSTER_NAME.lower() not in tipster_text.lower():
+            continue
 
-        # MATCH TITLE inside <td class="picktooltip"> -> <a>
+        # Tipster URL
+        tipster_link = a_tag_tipster.get("href", "")
+        if tipster_link and not tipster_link.startswith("http"):
+            tipster_link = URL.rstrip("/") + "/" + tipster_link.lstrip("/")
+
+        # 2️⃣ Match Title
         match_td = row.find("td", class_="picktooltip")
         if match_td:
-            a_tag_match = match_td.find("a")
-            match_title = a_tag_match.get_text(strip=True) if a_tag_match else "Unknown Match"
+            match_a = match_td.find("a")
+            match_title = match_a.get_text(strip=True) if match_a else "Unknown Match"
         else:
             match_title = "Unknown Match"
 
-        # Combine into final string
         pick_str = f"{TIPSTER_NAME} - {match_title} ({tipster_link})"
         picks.append(pick_str)
 
@@ -278,6 +330,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
